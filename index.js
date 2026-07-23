@@ -12,6 +12,7 @@ dotenv.config();
 
 
 
+
 // making the dB connection
 const mongoDBConnection = async()=> {
     try{
@@ -29,10 +30,22 @@ app.listen(5501,()=>{
     mongoDBConnection();
 });
 
+
 app.use(express.json())
 app.use("/api/role",roleRouter)
 app.use("/api/User",userRouter)
 app.use("/api/auth", authentication)
 
-
+// Repomse handler or Error handler
+// next function is required it tells current middle ware is completed move to next 
+app.use((object , req , res, next ) => {
+    const statusCode = object.status;
+    const message = object.message;
+    return res.status(statusCode).json(
+        { 
+            status :statusCode ,
+            message : message,
+            data : object.data 
+        });
+});
 
