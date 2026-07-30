@@ -33,7 +33,6 @@ try {
  
 } catch (error) {
         return next(CreateError(401, "User is Unauthorized"));
-
 }
    };
 
