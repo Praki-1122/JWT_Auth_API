@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { CreateError } from '../utils/Error.js';
 import { CreateSuccess } from '../utils/Success.js';
 import Role from '../models/Role_Type.js';
+import cookieParser from 'cookie-parser';
 
 
 export const Login = async (req, res, next) => {
@@ -11,7 +12,6 @@ try {
     const user = await Users.findOne({
         UserName : req.body.UserName
     });
-
         if (!user) 
         {
             return next(CreateError(404,"Invalid User Name"));
@@ -22,16 +22,20 @@ try {
             return next(CreateError(400 ,"Invalid Password"));
         }
 
-    const roles = await Role.findOne({"_id" : user.Roles[0]});
+    const roles = await Role.findOne({"_id" : {$in : user.Roles}});
     //token generation   
     const token  = jwt.sign({
+            "id" : user._id,
             'UserName' : user.UserName,
             'isAdmin' : user.isAdmin,
-            role : roles.RoleName,
+            'FirstName' : user.FirstName,
+            'LastName' : user.LastName,
+            'UserRole' : roles,
+
         },
         process.env.JWT_SECRET_KEY
     );
-    //cookie("jwtToken",token,{httpOnly : true}) - optional to add in cookie 
+    res.cookie("jwtToken",token,{httpOnly : true}); //- optional to add in cookie 
     res.status(200)
     .json({
         status : 200 , 

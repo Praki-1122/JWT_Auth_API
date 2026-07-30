@@ -6,6 +6,7 @@ import mongoose, { Mongoose } from 'mongoose';
 import roleRouter from './routes/Role.js';
 import userRouter from './routes/User.js';
 import authentication from './routes/Auth.js'
+import cookieParser from "cookie-parser";
 const app = express()
 // making the availabiltiy of connection string lik appsetting.json
 dotenv.config();
@@ -32,6 +33,7 @@ app.listen(5501,()=>{
 
 
 app.use(express.json())
+app.use(cookieParser());
 app.use("/api/role",roleRouter)
 app.use("/api/User",userRouter)
 app.use("/api/auth", authentication)

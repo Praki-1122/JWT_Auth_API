@@ -2,6 +2,7 @@
 import Users from "../models/Users.js";
 import Role from "../models/Role_Type.js"
 import bcrypt from 'bcryptjs';
+import { CreateError } from "../utils/Error.js";
 
 export const GetUsers = async (req, res , next)=>{
     try {
@@ -14,7 +15,18 @@ export const GetUsers = async (req, res , next)=>{
         console.log(error)
     }
 }
-
+export const GetById = async (req, res , next)=>{
+    try {
+        const user = await Users.find({_id : req.params.id});
+        if(user != null)
+            return res.status(200).json(user)
+        else
+            return next(CreateError(400,"User Not Found" ));
+    } catch (error) {
+        console.log(error)
+    }
+}
+//for the Normal user creation
 export const CreateUser = async (req , res, next)=>{
     try {
         const roleType = await Role.find({"RoleName" : 'User'});
@@ -28,7 +40,7 @@ export const CreateUser = async (req , res, next)=>{
             "Email" : req.body.Email,
             "MobileNumber" :req.body.MobileNumber,
             "Password" : encryptedKey,
-            "isAdmin" : req.body.isAdmin,
+            //"isAdmin" : req.body.isAdmin,
             "Roles" : roleType           
         })
         await newUser.save();
@@ -38,6 +50,32 @@ export const CreateUser = async (req , res, next)=>{
         console.log(error)
     }
 }
+
+//for the Admin user Creation 
+export const CreateAdmin = async (req , res, next)=>{
+    try {
+        const roleType = await Role.find();
+        console.log(roleType)
+        const salt =  await bcrypt.genSalt(10);
+        const encryptedKey = await bcrypt.hash(req.body.Password , salt) ;
+        const newUser = new Users ({
+            "FirstName" : req.body.FirstName,
+            "LastName" : req.body.LastName,
+            "UserName" : req.body.UserName,
+            "Email" : req.body.Email,
+            "MobileNumber" :req.body.MobileNumber,
+            "Password" : encryptedKey,
+            "isAdmin" : true,
+            "Roles" : roleType           
+        })
+        await newUser.save();
+        return res.status(200).send("Admin Registered")
+         
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
 export const UpdateUser = async (req , res , next)=>{
     try {
